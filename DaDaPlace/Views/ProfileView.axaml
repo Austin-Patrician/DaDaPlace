@@ -1,0 +1,404 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:DaDaPlace.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:Class="DaDaPlace.Views.ProfileView"
+             x:DataType="vm:ProfileViewModel">
+
+    <Design.DataContext>
+        <vm:ProfileViewModel/>
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Spacing="16" Margin="16">
+            
+            <!-- 用户信息卡片 -->
+            <Border Background="{DynamicResource SemiColorBgElevated}"
+                    CornerRadius="12"
+                    Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- 头像和基本信息 -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 头像 -->
+                        <Border Grid.Column="0" 
+                                Background="{DynamicResource SemiColorFillQuaternary}"
+                                CornerRadius="40"
+                                Width="80" Height="80">
+                            <Border.GestureRecognizers>
+                                <TappedGestureRecognizer Command="{Binding ChangeAvatarCommand}"/>
+                            </Border.GestureRecognizers>
+                            
+                            <Grid>
+                                <Image Source="{Binding UserProfile.Avatar}"
+                                       Stretch="UniformToFill"
+                                       IsVisible="{Binding UserProfile.Avatar, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                
+                                <semi:Icon Value="User" FontSize="32" 
+                                          Foreground="{DynamicResource SemiColorTextTertiary}"
+                                          IsVisible="{Binding UserProfile.Avatar, Converter={x:Static StringConverters.IsNullOrEmpty}}"/>
+                                
+                                <!-- 编辑图标 -->
+                                <Border Background="{DynamicResource SemiColorPrimary}"
+                                        CornerRadius="12"
+                                        Width="24" Height="24"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Bottom"
+                                        Margin="0,0,-4,-4">
+                                    <semi:Icon Value="Camera" FontSize="12" 
+                                              Foreground="White"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- 用户信息 -->
+                        <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                            <TextBox Text="{Binding UserProfile.Nickname}"
+                                    FontWeight="Bold" FontSize="18"
+                                    IsReadOnly="{Binding !IsEditMode}"
+                                    BorderThickness="0"
+                                    Background="Transparent"
+                                    Padding="0"/>
+                            
+                            <TextBlock Text="{Binding UserProfile.Gender}" 
+                                      FontSize="14" 
+                                      Foreground="{DynamicResource SemiColorTextSecondary}"
+                                      IsVisible="{Binding !IsEditMode}"/>
+                            
+                            <ComboBox ItemsSource="{Binding GenderOptions}"
+                                     SelectedItem="{Binding UserProfile.Gender}"
+                                     IsVisible="{Binding IsEditMode}"
+                                     Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <!-- 编辑按钮 -->
+                        <Button Grid.Column="2" 
+                                Classes="Tertiary"
+                                Command="{Binding ToggleEditModeCommand}"
+                                VerticalAlignment="Top">
+                            <semi:Icon Value="{Binding IsEditMode, Converter={StaticResource SelectConverter}, ConverterParameter='Check|Edit'}" FontSize="16"/>
+                        </Button>
+                    </Grid>
+                    
+                    <!-- 详细信息 (编辑模式) -->
+                    <Grid Grid.Row="1" IsVisible="{Binding IsEditMode}" Margin="0,16,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 身高 -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,8">
+                            <TextBlock Text="身高 (cm)" FontSize="12" Margin="0,0,0,4"/>
+                            <NumericUpDown Value="{Binding UserProfile.Height}"
+                                          Minimum="100" Maximum="250"
+                                          Increment="1"/>
+                        </StackPanel>
+                        
+                        <!-- 体重 -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,8">
+                            <TextBlock Text="体重 (kg)" FontSize="12" Margin="0,0,0,4"/>
+                            <NumericUpDown Value="{Binding UserProfile.Weight}"
+                                          Minimum="30" Maximum="200"
+                                          Increment="0.5"/>
+                        </StackPanel>
+                        
+                        <!-- 肤色 -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,8">
+                            <TextBlock Text="肤色" FontSize="12" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding SkinToneOptions}"
+                                     SelectedItem="{Binding UserProfile.SkinTone}"/>
+                        </StackPanel>
+                        
+                        <!-- 风格偏好 -->
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,8">
+                            <TextBlock Text="风格偏好" FontSize="12" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding StyleOptions}"
+                                     SelectedItem="{Binding UserProfile.StylePreference}"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- 操作按钮 (编辑模式) -->
+                    <Grid Grid.Row="2" IsVisible="{Binding IsEditMode}" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Grid.Column="0" 
+                                Classes="Secondary"
+                                Command="{Binding CancelEditCommand}"
+                                Content="取消"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,0,8,0"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="Primary"
+                                Command="{Binding SaveProfileCommand}"
+                                Content="保存"
+                                HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </Grid>
+            </Border>
+            
+            <!-- 统计信息 -->
+            <Border Background="{DynamicResource SemiColorBgElevated}"
+                    CornerRadius="12"
+                    Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Spacing="4" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding ClothingItems.Count}" 
+                                  FontWeight="Bold" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="衣物" FontSize="12" 
+                                  Foreground="{DynamicResource SemiColorTextSecondary}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding SavedOutfits.Count}" 
+                                  FontWeight="Bold" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="搭配" FontSize="12" 
+                                  Foreground="{DynamicResource SemiColorTextSecondary}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2" Spacing="4" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding CommunityPosts.Count}" 
+                                  FontWeight="Bold" FontSize="20" HorizontalAlignment="Center"/>
+                        <TextBlock Text="分享" FontSize="12" 
+                                  Foreground="{DynamicResource SemiColorTextSecondary}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- 内容选项卡 -->
+            <Border Background="{DynamicResource SemiColorBgElevated}"
+                    CornerRadius="12"
+                    Padding="16">
+                <StackPanel Spacing="12">
+                    <!-- 选项卡头部 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Grid.Column="0" 
+                                Classes="{Binding SelectedTab, Converter={StaticResource SelectConverter}, ConverterParameter='Primary|Tertiary', ConverterParameterType=x:String}"
+                                Command="{Binding SelectTabCommand}"
+                                CommandParameter="衣物"
+                                Content="衣物"
+                                HorizontalAlignment="Stretch"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="{Binding SelectedTab, Converter={StaticResource SelectConverter}, ConverterParameter='Primary|Tertiary', ConverterParameterType=x:String}"
+                                Command="{Binding SelectTabCommand}"
+                                CommandParameter="搭配"
+                                Content="搭配"
+                                HorizontalAlignment="Stretch"/>
+                        
+                        <Button Grid.Column="2" 
+                                Classes="{Binding SelectedTab, Converter={StaticResource SelectConverter}, ConverterParameter='Primary|Tertiary', ConverterParameterType=x:String}"
+                                Command="{Binding SelectTabCommand}"
+                                CommandParameter="分享"
+                                Content="分享"
+                                HorizontalAlignment="Stretch"/>
+                    </Grid>
+                    
+                    <!-- 内容区域 -->
+                    <Border MinHeight="200">
+                        <!-- 衣物列表 -->
+                        <ScrollViewer IsVisible="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter='衣物'}">
+                            <ItemsControl ItemsSource="{Binding ClothingItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="3"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SemiColorBgContainer}"
+                                                CornerRadius="8"
+                                                Margin="4"
+                                                Padding="8">
+                                            <StackPanel Spacing="4">
+                                                <Border Background="{DynamicResource SemiColorFillQuaternary}"
+                                                        CornerRadius="4"
+                                                        Height="80">
+                                                    <Image Source="{Binding CropUri, FallbackValue={Binding Uri}}"
+                                                           Stretch="UniformToFill"/>
+                                                </Border>
+                                                
+                                                <TextBlock Text="{Binding Category2}" 
+                                                          FontSize="10" FontWeight="Medium"
+                                                          TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        
+                        <!-- 搭配列表 -->
+                        <ScrollViewer IsVisible="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter='搭配'}">
+                            <ItemsControl ItemsSource="{Binding SavedOutfits}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SemiColorBgContainer}"
+                                                CornerRadius="8"
+                                                Margin="0,4"
+                                                Padding="12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <Border Grid.Column="0" 
+                                                        Background="{DynamicResource SemiColorFillQuaternary}"
+                                                        CornerRadius="4"
+                                                        Width="60" Height="60">
+                                                    <Image Source="{Binding ImageUri}"
+                                                           Stretch="UniformToFill"/>
+                                                </Border>
+                                                
+                                                <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:MM-dd}'}" 
+                                                              FontSize="12" 
+                                                              Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        
+                        <!-- 分享列表 -->
+                        <ScrollViewer IsVisible="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter='分享'}">
+                            <ItemsControl ItemsSource="{Binding CommunityPosts}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SemiColorBgContainer}"
+                                                CornerRadius="8"
+                                                Margin="0,4"
+                                                Padding="12">
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="{Binding Content}" 
+                                                          TextTrimming="CharacterEllipsis"
+                                                          MaxLines="2"/>
+                                                
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <TextBlock Grid.Column="0"
+                                                              Text="{Binding CreatedAt, StringFormat='{}{0:MM-dd HH:mm}'}" 
+                                                              FontSize="12" 
+                                                              Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                                    
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                                            <semi:Icon Value="Heart" FontSize="12"/>
+                                                            <TextBlock Text="{Binding LikeCount}" FontSize="12"/>
+                                                        </StackPanel>
+                                                        
+                                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                                            <semi:Icon Value="MessageCircle" FontSize="12"/>
+                                                            <TextBlock Text="{Binding CommentCount}" FontSize="12"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- 设置选项 -->
+            <Border Background="{DynamicResource SemiColorBgElevated}"
+                    CornerRadius="12"
+                    Padding="16">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="设置" FontWeight="Bold" FontSize="16" Margin="0,0,0,8"/>
+                    
+                    <ItemsControl ItemsSource="{Binding SettingItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="Transparent"
+                                        Padding="12,8"
+                                        CornerRadius="8">
+                                    <Border.GestureRecognizers>
+                                        <TappedGestureRecognizer Command="{Binding Command}"/>
+                                    </Border.GestureRecognizers>
+                                    
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <semi:Icon Grid.Column="0" 
+                                                  Value="{Binding Icon}" 
+                                                  FontSize="20" 
+                                                  Foreground="{DynamicResource SemiColorPrimary}"
+                                                  VerticalAlignment="Center"/>
+                                        
+                                        <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding Description}" 
+                                                      FontSize="12" 
+                                                      Foreground="{DynamicResource SemiColorTextSecondary}"
+                                                      IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                        </StackPanel>
+                                        
+                                        <semi:Icon Grid.Column="2" 
+                                                  Value="ChevronRight" 
+                                                  FontSize="16" 
+                                                  Foreground="{DynamicResource SemiColorTextTertiary}"
+                                                  VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+            
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

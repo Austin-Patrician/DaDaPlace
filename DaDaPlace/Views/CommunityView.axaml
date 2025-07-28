@@ -1,0 +1,428 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:DaDaPlace.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:Class="DaDaPlace.Views.CommunityView"
+             x:DataType="vm:CommunityViewModel">
+
+    <Design.DataContext>
+        <vm:CommunityViewModel/>
+    </Design.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 顶部筛选栏 -->
+            <RowDefinition Height="*"/>    <!-- 内容区域 -->
+        </Grid.RowDefinitions>
+        
+        <!-- 顶部筛选栏 -->
+        <Border Grid.Row="0" Background="{DynamicResource SemiColorBgContainer}" 
+                BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="0,0,0,1"
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Feed类型选择 -->
+                <ComboBox Grid.Column="0"
+                         ItemsSource="{Binding FeedTypes}"
+                         SelectedItem="{Binding SelectedFeedType}"
+                         HorizontalAlignment="Stretch"/>
+                
+                <!-- 搜索按钮 -->
+                <Button Grid.Column="1"
+                        Classes="Tertiary"
+                        Command="{Binding OpenSearchCommand}"
+                        Margin="8,0,0,0">
+                    <semi:Icon Value="Search" FontSize="16"/>
+                </Button>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区域 -->
+        <Grid Grid.Row="1">
+            <!-- 加载状态 -->
+            <Border IsVisible="{Binding IsLoading}"
+                    Background="{DynamicResource SemiColorBgContainer}">
+                <StackPanel Orientation="Vertical" Spacing="12" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <semi:ProgressRing IsIndeterminate="True" Width="32" Height="32"/>
+                    <TextBlock Text="加载中..." HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- 内容区域 -->
+            <RefreshContainer IsVisible="{Binding !IsLoading}"
+                             RefreshRequested="{Binding RefreshCommand}">
+                <ScrollViewer>
+                    <StackPanel Spacing="16" Margin="16">
+                        
+                        <!-- 搜索框 (搜索模式下显示) -->
+                        <Border IsVisible="{Binding IsSearchMode}"
+                                Background="{DynamicResource SemiColorBgElevated}"
+                                CornerRadius="12"
+                                Padding="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBox Grid.Column="0"
+                                        Text="{Binding SearchText}"
+                                        Watermark="搜索穿搭、用户或话题..."
+                                        HorizontalAlignment="Stretch"/>
+                                
+                                <Button Grid.Column="1"
+                                        Classes="Tertiary"
+                                        Command="{Binding CloseSearchCommand}"
+                                        Margin="8,0,0,0">
+                                    <semi:Icon Value="Close" FontSize="16"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- 热门话题 -->
+                        <Border IsVisible="{Binding TrendingTopics.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}"
+                                Background="{DynamicResource SemiColorBgElevated}"
+                                CornerRadius="12"
+                                Padding="16">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="热门话题" FontWeight="Bold" FontSize="16"/>
+                                
+                                <ScrollViewer>
+                                    <ItemsControl ItemsSource="{Binding TrendingTopics}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource SemiColorPrimaryBg}"
+                                                        CornerRadius="16"
+                                                        Padding="12,6">
+                                                    <Border.GestureRecognizers>
+                                                        <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.SearchByTopicCommand}"
+                                                                               CommandParameter="{Binding}"/>
+                                                    </Border.GestureRecognizers>
+                                                    
+                                                    <TextBlock Text="{Binding}" 
+                                                              FontSize="12" FontWeight="Medium"
+                                                              Foreground="{DynamicResource SemiColorPrimary}"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 每周挑战 -->
+                        <Border IsVisible="{Binding WeeklyChallenges.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}"
+                                Background="{DynamicResource SemiColorBgElevated}"
+                                CornerRadius="12"
+                                Padding="16">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="每周挑战" FontWeight="Bold" FontSize="16"/>
+                                
+                                <ItemsControl ItemsSource="{Binding WeeklyChallenges}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SemiColorBgContainer}"
+                                                    CornerRadius="8"
+                                                    Margin="0,4"
+                                                    Padding="12">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    
+                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="Medium"/>
+                                                        <TextBlock Text="{Binding Description}" 
+                                                                  FontSize="12" 
+                                                                  Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                                        <TextBlock Text="{Binding ParticipantCount, StringFormat='{}{0}人参与'}" 
+                                                                  FontSize="10" 
+                                                                  Foreground="{DynamicResource SemiColorTextTertiary}"/>
+                                                    </StackPanel>
+                                                    
+                                                    <Button Grid.Column="2" 
+                                                            Classes="Primary"
+                                                            Command="{Binding $parent[UserControl].DataContext.JoinChallengeCommand}"
+                                                            CommandParameter="{Binding}"
+                                                            Content="参与"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 帖子列表 -->
+                        <ItemsControl ItemsSource="{Binding FilteredPosts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SemiColorBgElevated}"
+                                            CornerRadius="12"
+                                            Margin="0,8"
+                                            Padding="16">
+                                        <StackPanel Spacing="12">
+                                            <!-- 用户信息 -->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <Border Grid.Column="0" 
+                                                        Background="{DynamicResource SemiColorFillQuaternary}"
+                                                        CornerRadius="20"
+                                                        Width="40" Height="40">
+                                                    <Image Source="{Binding UserAvatar}"
+                                                           Stretch="UniformToFill"/>
+                                                </Border>
+                                                
+                                                <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding UserNickname}" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:MM-dd HH:mm}'}" 
+                                                              FontSize="12" 
+                                                              Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                                </StackPanel>
+                                                
+                                                <Button Grid.Column="2" 
+                                                        Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.ViewPostDetailsCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <semi:Icon Value="MoreHorizontal" FontSize="16"/>
+                                                </Button>
+                                            </Grid>
+                                            
+                                            <!-- 内容 -->
+                                            <TextBlock Text="{Binding Content}" 
+                                                      TextWrapping="Wrap"
+                                                      IsVisible="{Binding Content, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+                                            
+                                            <!-- 图片 -->
+                                            <ScrollViewer IsVisible="{Binding ImageUris.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}">
+                                                <ItemsControl ItemsSource="{Binding ImageUris}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" Spacing="8"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource SemiColorFillQuaternary}"
+                                                                    CornerRadius="8"
+                                                                    Width="120" Height="160">
+                                                                <Image Source="{Binding}"
+                                                                       Stretch="UniformToFill"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                            
+                                            <!-- 话题标签 -->
+                                            <ScrollViewer IsVisible="{Binding Topics.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}">
+                                                <ItemsControl ItemsSource="{Binding Topics}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{DynamicResource SemiColorPrimaryBg}"
+                                                                    CornerRadius="12"
+                                                                    Padding="8,4">
+                                                                <Border.GestureRecognizers>
+                                                                    <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.SearchByTopicCommand}"
+                                                                                           CommandParameter="{Binding}"/>
+                                                                </Border.GestureRecognizers>
+                                                                
+                                                                <TextBlock Text="{Binding, StringFormat='#{0}'}" 
+                                                                          FontSize="10" 
+                                                                          Foreground="{DynamicResource SemiColorPrimary}"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                            
+                                            <!-- 互动按钮 -->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <Button Grid.Column="0" 
+                                                        Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.LikePostCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Stretch">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <semi:Icon Value="Heart" FontSize="14"/>
+                                                        <TextBlock Text="{Binding LikeCount}" FontSize="12"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                
+                                                <Button Grid.Column="1" 
+                                                        Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.ViewPostDetailsCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Stretch">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <semi:Icon Value="MessageCircle" FontSize="14"/>
+                                                        <TextBlock Text="{Binding CommentCount}" FontSize="12"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                
+                                                <Button Grid.Column="2" 
+                                                        Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.CollectPostCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Stretch">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <semi:Icon Value="Bookmark" FontSize="14"/>
+                                                        <TextBlock Text="{Binding CollectCount}" FontSize="12"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                
+                                                <Button Grid.Column="3" 
+                                                        Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.TryOnOutfitCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        HorizontalAlignment="Stretch"
+                                                        IsVisible="{Binding OutfitLookId, Converter={StaticResource IsNotNullConverter}}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <semi:Icon Value="Shirt" FontSize="14"/>
+                                                        <TextBlock Text="试穿" FontSize="12"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </Grid>
+                                        </StackPanel>
+                                        
+                                        <Border.GestureRecognizers>
+                                            <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.ViewPostDetailsCommand}"
+                                                                   CommandParameter="{Binding}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- 空状态 -->
+        <Border IsVisible="{Binding FilteredPosts.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}"
+                Background="{DynamicResource SemiColorBgElevated}"
+                                CornerRadius="12"
+                                Padding="32"
+                                MinHeight="200">
+                            <StackPanel Orientation="Vertical" Spacing="12" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <semi:Icon Value="Users" FontSize="48" 
+                                          Foreground="{DynamicResource SemiColorTextTertiary}"/>
+                                <TextBlock Text="暂无内容" 
+                                          FontSize="16" FontWeight="Medium"
+                                          HorizontalAlignment="Center"/>
+                                <TextBlock Text="快来发布第一个穿搭分享吧！" 
+                                          FontSize="12" 
+                                          Foreground="{DynamicResource SemiColorTextSecondary}"
+                                          HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        
+                    </StackPanel>
+                </ScrollViewer>
+            </RefreshContainer>
+        </Grid>
+        
+        <!-- 发布帖子对话框 -->
+        <Border IsVisible="{Binding IsCreatePostDialogOpen}"
+                Background="{DynamicResource SemiColorBgMask}"
+                Grid.RowSpan="2">
+            <Border Background="{DynamicResource SemiColorBgElevated}"
+                    CornerRadius="12"
+                    MaxWidth="350"
+                    Margin="20"
+                    Padding="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel Spacing="16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="发布穿搭" FontWeight="Bold" FontSize="18"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="Tertiary"
+                                Command="{Binding CloseCreatePostDialogCommand}">
+                            <semi:Icon Value="Close" FontSize="16"/>
+                        </Button>
+                    </Grid>
+                    
+                    <TextBox Text="{Binding CreatePostDialog.Content}"
+                            Watermark="分享你的穿搭心得..."
+                            AcceptsReturn="True"
+                            TextWrapping="Wrap"
+                            MinHeight="80"/>
+                    
+                    <Border Background="{DynamicResource SemiColorFillQuaternary}"
+                            CornerRadius="8"
+                            MinHeight="100"
+                            Padding="12">
+                        <StackPanel Orientation="Vertical" Spacing="8" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <semi:Icon Value="Camera" FontSize="32" 
+                                      Foreground="{DynamicResource SemiColorTextTertiary}"/>
+                            <TextBlock Text="点击添加图片" 
+                                      Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBox Text="{Binding CreatePostDialog.Topics}"
+                            Watermark="添加话题标签 (用空格分隔)"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Button Grid.Column="0" 
+                                Classes="Secondary"
+                                Command="{Binding CloseCreatePostDialogCommand}"
+                                Content="取消"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,0,8,0"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="Primary"
+                                Command="{Binding PublishPostCommand}"
+                                Content="发布"
+                                HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

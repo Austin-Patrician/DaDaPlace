@@ -24,5 +24,19 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
+        
+        <!-- Semi.Avalonia UI Library -->
+        <PackageReference Include="Semi.Avalonia" Version="11.1.0"/>
+        <PackageReference Include="Semi.Avalonia.ColorPicker" Version="11.1.0"/>
+        <PackageReference Include="Semi.Avalonia.DataGrid" Version="11.1.0"/>
+        <PackageReference Include="Semi.Avalonia.TreeDataGrid" Version="11.0.10.4"/>
+        
+        <!-- Additional packages for AI and image processing -->
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0"/>
+        <PackageReference Include="System.Text.Json" Version="8.0.5"/>
+        <PackageReference Include="SQLite" Version="3.13.0"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0"/>
     </ItemGroup>
 </Project>

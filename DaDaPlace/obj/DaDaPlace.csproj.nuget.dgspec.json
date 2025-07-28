@@ -67,6 +67,46 @@
             "CommunityToolkit.Mvvm": {
               "target": "Package",
               "version": "[8.2.1, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "SQLite": {
+              "target": "Package",
+              "version": "[3.13.0, )"
+            },
+            "Semi.Avalonia": {
+              "target": "Package",
+              "version": "[11.1.0, )"
+            },
+            "Semi.Avalonia.ColorPicker": {
+              "target": "Package",
+              "version": "[11.1.0, )"
+            },
+            "Semi.Avalonia.DataGrid": {
+              "target": "Package",
+              "version": "[11.1.0, )"
+            },
+            "Semi.Avalonia.TreeDataGrid": {
+              "target": "Package",
+              "version": "[11.0.10.4, )"
+            },
+            "System.Text.Json": {
+              "target": "Package",
+              "version": "[8.0.5, )"
             }
           },
           "imports": [

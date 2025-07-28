@@ -24,5 +24,17 @@ build_property.EnableCodeStyleSeverity =
 [/Users/aa123456/code/net/DaDaPlace/DaDaPlace/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[/Users/aa123456/code/net/DaDaPlace/DaDaPlace/Views/CommunityView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [/Users/aa123456/code/net/DaDaPlace/DaDaPlace/Views/MainWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/Users/aa123456/code/net/DaDaPlace/DaDaPlace/Views/OutfitView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/Users/aa123456/code/net/DaDaPlace/DaDaPlace/Views/ProfileView.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[/Users/aa123456/code/net/DaDaPlace/DaDaPlace/Views/WardrobeView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

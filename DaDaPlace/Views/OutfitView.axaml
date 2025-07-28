@@ -1,0 +1,422 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:DaDaPlace.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:Class="DaDaPlace.Views.OutfitView"
+             x:DataType="vm:OutfitViewModel">
+
+    <Design.DataContext>
+        <vm:OutfitViewModel/>
+    </Design.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 模式选择 -->
+            <RowDefinition Height="*"/>    <!-- 主内容 -->
+        </Grid.RowDefinitions>
+        
+        <!-- 模式选择栏 -->
+        <Border Grid.Row="0" Background="{DynamicResource SemiColorBgContainer}" 
+                BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="0,0,0,1"
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 模式选择 -->
+                <ComboBox Grid.Column="0"
+                         ItemsSource="{Binding OutfitModes}"
+                         SelectedItem="{Binding OutfitMode}"
+                         HorizontalAlignment="Stretch"/>
+                
+                <!-- 开始搭配按钮 -->
+                <Button Grid.Column="1"
+                        Classes="Primary"
+                        Command="{Binding GenerateAIOutfitCommand}"
+                        Content="开始搭配"
+                        IsEnabled="{Binding !IsGenerating}"
+                        Margin="8,0,0,0"/>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区域 -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="16" Margin="16">
+                
+                <!-- AI一键搭配设置 -->
+                <Border IsVisible="{Binding OutfitMode, Converter={StaticResource EqualityConverter}, ConverterParameter='AI一键搭配'}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="12"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="搭配需求" FontWeight="Bold" FontSize="16"/>
+                        
+                        <!-- 天气选择 -->
+                        <StackPanel>
+                            <TextBlock Text="天气" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding WeatherOptions}"
+                                     SelectedItem="{Binding SelectedWeather}"
+                                     HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        
+                        <!-- 温度设置 -->
+                        <StackPanel>
+                            <TextBlock Text="{Binding Temperature, StringFormat='温度: {0}°C'}" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <Slider Value="{Binding Temperature}"
+                                   Minimum="-10" Maximum="40"
+                                   TickFrequency="5"
+                                   IsSnapToTickEnabled="True"/>
+                        </StackPanel>
+                        
+                        <!-- 场合选择 -->
+                        <StackPanel>
+                            <TextBlock Text="场合" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding OccasionOptions}"
+                                     SelectedItem="{Binding SelectedOccasion}"
+                                     HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 自选场景设置 -->
+                <Border IsVisible="{Binding OutfitMode, Converter={StaticResource EqualityConverter}, ConverterParameter='自选场景'}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="12"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="选择起始单品" FontWeight="Bold" FontSize="16"/>
+                        
+                        <!-- 起始单品选择 -->
+                        <Border Background="{DynamicResource SemiColorFillQuaternary}"
+                                CornerRadius="8"
+                                MinHeight="120"
+                                Padding="12">
+                            <Grid>
+                                <!-- 未选择状态 -->
+                                <StackPanel IsVisible="{Binding StartingItem, Converter={x:Static ObjectConverters.IsNull}}"
+                                           Orientation="Vertical" Spacing="8"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <semi:Icon Value="Plus" FontSize="32" 
+                                              Foreground="{DynamicResource SemiColorTextTertiary}"/>
+                                    <TextBlock Text="点击选择起始单品" 
+                                              Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                </StackPanel>
+                                
+                                <!-- 已选择状态 -->
+                                <Grid IsVisible="{Binding StartingItem, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Border Grid.Column="0" 
+                                            Background="{DynamicResource SemiColorBgContainer}"
+                                            CornerRadius="8"
+                                            Width="80" Height="80">
+                                        <Image Source="{Binding StartingItem.CropUri, FallbackValue={Binding StartingItem.Uri}}"
+                                               Stretch="UniformToFill"/>
+                                    </Border>
+                                    
+                                    <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding StartingItem.Category2}" FontWeight="Medium"/>
+                                        <TextBlock Text="{Binding StartingItem.BaseColor}" 
+                                                  Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                    </StackPanel>
+                                    
+                                    <Button Grid.Column="2" 
+                                            Classes="Tertiary"
+                                            Command="{Binding SelectStartingItemCommand}"
+                                            CommandParameter="{x:Null}">
+                                        <semi:Icon Value="Close" FontSize="16"/>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                            
+                            <Border.GestureRecognizers>
+                                <TappedGestureRecognizer Command="{Binding LoadAvailableItemsCommand}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+                        
+                        <!-- 可选单品列表 -->
+                        <ScrollViewer IsVisible="{Binding AvailableItems.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}"
+                                     MaxHeight="200">
+                            <ItemsControl ItemsSource="{Binding AvailableItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SemiColorBgContainer}"
+                                                CornerRadius="8"
+                                                Width="60" Height="60"
+                                                Padding="4">
+                                            <Border.GestureRecognizers>
+                                                <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.SelectStartingItemCommand}"
+                                                                       CommandParameter="{Binding}"/>
+                                            </Border.GestureRecognizers>
+                                            
+                                            <Image Source="{Binding CropUri, FallbackValue={Binding Uri}}"
+                                                   Stretch="UniformToFill"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 生成中状态 -->
+                <Border IsVisible="{Binding IsGenerating}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="12"
+                        Padding="24">
+                    <StackPanel Orientation="Vertical" Spacing="12" HorizontalAlignment="Center">
+                        <semi:ProgressRing IsIndeterminate="True" Width="32" Height="32"/>
+                        <TextBlock Text="AI正在为您生成搭配..." HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 当前搭配展示 -->
+                <Border IsVisible="{Binding CurrentOutfit, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="12"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="{Binding CurrentOutfit.Name}" 
+                                      FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                            
+                            <Button Grid.Column="1" 
+                                    Classes="Secondary"
+                                    Command="{Binding ShareOutfitCommand}"
+                                    CommandParameter="{Binding CurrentOutfit}"
+                                    Margin="0,0,8,0">
+                                <semi:Icon Value="Share" FontSize="16"/>
+                            </Button>
+                            
+                            <Button Grid.Column="2" 
+                                    Classes="Primary"
+                                    Command="{Binding SaveCurrentOutfitCommand}">
+                                <semi:Icon Value="Heart" FontSize="16"/>
+                            </Button>
+                        </Grid>
+                        
+                        <!-- 搭配图片 -->
+                        <Border Background="{DynamicResource SemiColorFillQuaternary}"
+                                CornerRadius="8"
+                                Height="200">
+                            <Image Source="{Binding CurrentOutfit.ImageUri}"
+                                   Stretch="UniformToFill"/>
+                        </Border>
+                        
+                        <!-- 推荐理由 -->
+                        <Border IsVisible="{Binding RecommendationReason, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                Background="{DynamicResource SemiColorInfoBg}"
+                                CornerRadius="8"
+                                Padding="12">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="推荐理由" FontWeight="Medium" FontSize="12"/>
+                                <TextBlock Text="{Binding RecommendationReason}" 
+                                          FontSize="12" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 搭配评分 -->
+                        <Grid IsVisible="{Binding CurrentOutfitScore, Converter={x:Static ObjectConverters.IsNotNull}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="天气匹配" FontSize="10" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding CurrentOutfitScore.WeatherMatchScore, StringFormat='{}{0:P0}'}" 
+                                          FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="色彩和谐" FontSize="10" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding CurrentOutfitScore.ColorHarmonyScore, StringFormat='{}{0:P0}'}" 
+                                          FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="风格一致" FontSize="10" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding CurrentOutfitScore.StyleConsistencyScore, StringFormat='{}{0:P0}'}" 
+                                          FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 推荐搭配列表 -->
+                <Border IsVisible="{Binding RecommendedOutfits.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="12"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="更多推荐" FontWeight="Bold" FontSize="16"/>
+                            
+                            <Button Grid.Column="1" 
+                                    Classes="Tertiary"
+                                    Command="{Binding RefreshRecommendationsCommand}">
+                                <semi:Icon Value="Refresh" FontSize="16"/>
+                            </Button>
+                        </Grid>
+                        
+                        <ScrollViewer>
+                            <ItemsControl ItemsSource="{Binding RecommendedOutfits}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="12"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SemiColorBgContainer}"
+                                                CornerRadius="8"
+                                                Width="120" Height="160"
+                                                Padding="8">
+                                            <Border.GestureRecognizers>
+                                                <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.SelectOutfitCommand}"
+                                                                       CommandParameter="{Binding}"/>
+                                            </Border.GestureRecognizers>
+                                            
+                                            <StackPanel Spacing="8">
+                                                <Border Background="{DynamicResource SemiColorFillQuaternary}"
+                                                        CornerRadius="4"
+                                                        Height="100">
+                                                    <Image Source="{Binding ImageUri}"
+                                                           Stretch="UniformToFill"/>
+                                                </Border>
+                                                
+                                                <TextBlock Text="{Binding Name}" 
+                                                          FontSize="12" FontWeight="Medium"
+                                                          TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 已保存的搭配 -->
+                <Border IsVisible="{Binding SavedOutfits.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="12"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="我的搭配" FontWeight="Bold" FontSize="16"/>
+                        
+                        <ItemsControl ItemsSource="{Binding SavedOutfits}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SemiColorBgContainer}"
+                                            CornerRadius="8"
+                                            Margin="0,4"
+                                            Padding="12">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <Border Grid.Column="0" 
+                                                    Background="{DynamicResource SemiColorFillQuaternary}"
+                                                    CornerRadius="4"
+                                                    Width="60" Height="60">
+                                                <Image Source="{Binding ImageUri}"
+                                                       Stretch="UniformToFill"/>
+                                            </Border>
+                                            
+                                            <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                                                <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:MM-dd HH:mm}'}" 
+                                                          FontSize="12" 
+                                                          Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                                                <Button Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.LoadSavedOutfitCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <semi:Icon Value="Eye" FontSize="16"/>
+                                                </Button>
+                                                
+                                                <Button Classes="Tertiary"
+                                                        Command="{Binding $parent[UserControl].DataContext.DeleteSavedOutfitCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <semi:Icon Value="Delete" FontSize="16"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                        
+                                        <Border.GestureRecognizers>
+                                            <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.LoadSavedOutfitCommand}"
+                                                                   CommandParameter="{Binding}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 衣橱缺口分析 -->
+                <Border IsVisible="{Binding WardrobeGaps.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}"
+                        Background="{DynamicResource SemiColorWarningBg}"
+                        CornerRadius="12"
+                        Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="衣橱缺口分析" FontWeight="Bold" FontSize="16"/>
+                        
+                        <ItemsControl ItemsSource="{Binding WardrobeGaps}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SemiColorBgContainer}"
+                                            CornerRadius="8"
+                                            Margin="0,4"
+                                            Padding="12">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding Category}" FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding Reason}" 
+                                                      FontSize="12" TextWrapping="Wrap"
+                                                      Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+                
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,15 +1,28 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:semi="https://irihi.tech/semi"
              x:Class="DaDaPlace.App"
              xmlns:local="using:DaDaPlace"
+             xmlns:converters="using:DaDaPlace.Converters"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+    
+    <Application.Resources>
+        <converters:EqualityConverter x:Key="EqualityConverter"/>
+        <converters:GreaterThanConverter x:Key="GreaterThanConverter"/>
+        <converters:SelectConverter x:Key="SelectConverter"/>
+        <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
+        <converters:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter"/>
+    </Application.Resources>
   
     <Application.Styles>
-        <FluentTheme />
+        <semi:SemiTheme Locale="zh-CN" />
+        <semi:ColorPickerSemiTheme />
+        <semi:DataGridSemiTheme />
+        <semi:TreeDataGridSemiTheme />
     </Application.Styles>
 </Application>

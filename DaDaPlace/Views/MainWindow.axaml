@@ -1,20 +1,246 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:DaDaPlace.ViewModels"
+        xmlns:views="using:DaDaPlace.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:semi="https://irihi.tech/semi"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="700"
         x:Class="DaDaPlace.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="DaDaPlace">
+        Title="{Binding Title}"
+        Width="400" Height="700"
+        MinWidth="350" MinHeight="600">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+    <Grid>
+        <!-- 主内容区域 -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 标题栏 -->
+            <RowDefinition Height="*"/>    <!-- 内容区域 -->
+            <RowDefinition Height="Auto"/> <!-- 底部导航栏 -->
+        </Grid.RowDefinitions>
+        
+        <!-- 标题栏 -->
+        <Border Grid.Row="0" Background="{DynamicResource SemiColorPrimary}" Height="60">
+            <Grid Margin="16,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 抽屉菜单按钮 -->
+                <Button Grid.Column="0" 
+                        Classes="Tertiary"
+                        Command="{Binding ToggleDrawerCommand}"
+                        VerticalAlignment="Center">
+                    <semi:Icon Value="Menu" FontSize="20" Foreground="White"/>
+                </Button>
+                
+                <!-- 标题 -->
+                <TextBlock Grid.Column="1" 
+                          Text="{Binding Title}"
+                          FontSize="20" FontWeight="Bold"
+                          Foreground="White"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"/>
+                
+                <!-- 搜索按钮 -->
+                <Button Grid.Column="2" 
+                        Classes="Tertiary"
+                        Command="{Binding GlobalSearchCommand}"
+                        VerticalAlignment="Center">
+                    <semi:Icon Value="Search" FontSize="20" Foreground="White"/>
+                </Button>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区域 -->
+        <Grid Grid.Row="1">
+            <!-- 衣橱页面 -->
+            <views:WardrobeView IsVisible="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=0}"
+                               DataContext="{Binding WardrobeViewModel}"/>
+            
+            <!-- 搭配页面 -->
+            <views:OutfitView IsVisible="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=1}"
+                             DataContext="{Binding OutfitViewModel}"/>
+            
+            <!-- 社区页面 -->
+            <views:CommunityView IsVisible="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=2}"
+                                DataContext="{Binding CommunityViewModel}"/>
+            
+            <!-- 我的页面 -->
+            <views:ProfileView IsVisible="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=3}"
+                              DataContext="{Binding ProfileViewModel}"/>
+            
+            <!-- 悬浮添加按钮 -->
+            <Button Classes="Primary Floating"
+                    Command="{Binding AddNewClothingCommand}"
+                    Width="56" Height="56"
+                    CornerRadius="28"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,20,20"
+                    Background="{DynamicResource SemiColorPrimary}"
+                    BoxShadow="0 4 8 0 #40000000">
+                <semi:Icon Value="Plus" FontSize="24" Foreground="White"/>
+            </Button>
+        </Grid>
+        
+        <!-- 底部导航栏 -->
+        <Border Grid.Row="2" Background="{DynamicResource SemiColorBgContainer}" 
+                BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="0,1,0,0">
+            <Grid Height="60">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 衣橱 -->
+                <Button Grid.Column="0" 
+                        Classes="Tertiary"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="0"
+                        Background="Transparent"
+                        Padding="8">
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <semi:Icon Value="Wardrobe" FontSize="20" 
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=0, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                        <TextBlock Text="衣橱" FontSize="10" HorizontalAlignment="Center"
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=0, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                    </StackPanel>
+                </Button>
+                
+                <!-- 搭配 -->
+                <Button Grid.Column="1" 
+                        Classes="Tertiary"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="1"
+                        Background="Transparent"
+                        Padding="8">
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <semi:Icon Value="Outfit" FontSize="20" 
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=1, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                        <TextBlock Text="搭配" FontSize="10" HorizontalAlignment="Center"
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=1, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                    </StackPanel>
+                </Button>
+                
+                <!-- 探索社区 -->
+                <Button Grid.Column="2" 
+                        Classes="Tertiary"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="2"
+                        Background="Transparent"
+                        Padding="8">
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <semi:Icon Value="Community" FontSize="20" 
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=2, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                        <TextBlock Text="社区" FontSize="10" HorizontalAlignment="Center"
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=2, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                    </StackPanel>
+                </Button>
+                
+                <!-- 我的 -->
+                <Button Grid.Column="3" 
+                        Classes="Tertiary"
+                        Command="{Binding SelectTabCommand}"
+                        CommandParameter="3"
+                        Background="Transparent"
+                        Padding="8">
+                    <StackPanel Orientation="Vertical" Spacing="4">
+                        <semi:Icon Value="Person" FontSize="20" 
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=3, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                        <TextBlock Text="我的" FontSize="10" HorizontalAlignment="Center"
+                                  Foreground="{Binding SelectedTabIndex, Converter={StaticResource EqualityConverter}, ConverterParameter=3, 
+                                              FalseValue={DynamicResource SemiColorTextTertiary}, TrueValue={DynamicResource SemiColorPrimary}}"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+        
+        <!-- 侧边抽屉 -->
+        <Border Grid.RowSpan="3" 
+                Background="#80000000" 
+                IsVisible="{Binding IsDrawerOpen}"
+                ZIndex="100">
+            <Border.GestureRecognizers>
+                <TappedGestureRecognizer Command="{Binding ToggleDrawerCommand}"/>
+            </Border.GestureRecognizers>
+            
+            <Border Width="280" 
+                    Background="{DynamicResource SemiColorBgContainer}"
+                    HorizontalAlignment="Left"
+                    BoxShadow="4 0 8 0 #40000000">
+                <Border.GestureRecognizers>
+                    <TappedGestureRecognizer/> <!-- 阻止事件冒泡 -->
+                </Border.GestureRecognizers>
+                
+                <StackPanel Margin="20">
+                    <!-- 抽屉头部 -->
+                    <Grid Margin="0,0,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="{Binding Title}" 
+                                  FontSize="18" FontWeight="Bold"
+                                  VerticalAlignment="Center"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="Tertiary"
+                                Command="{Binding ToggleDrawerCommand}">
+                            <semi:Icon Value="Close" FontSize="16"/>
+                        </Button>
+                    </Grid>
+                    
+                    <!-- 快捷导航 -->
+                    <ItemsControl ItemsSource="{Binding TabItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="Tertiary" 
+                                        Command="{Binding $parent[Window].DataContext.SelectTabCommand}"
+                                        CommandParameter="{Binding $parent[ItemsControl].ItemsSource.IndexOf(.)}"
+                                        Margin="0,4"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Left">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <semi:Icon Value="{Binding IconName}" FontSize="16"/>
+                                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                    <Separator Margin="0,20"/>
+                    
+                    <!-- 设置入口 -->
+                    <Button Classes="Tertiary" 
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <semi:Icon Value="Settings" FontSize="16"/>
+                            <TextBlock Text="设置" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
 </Window>

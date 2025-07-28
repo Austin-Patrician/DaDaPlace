@@ -1,0 +1,296 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:semi="https://irihi.tech/semi"
+             xmlns:vm="using:DaDaPlace.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:Class="DaDaPlace.Views.WardrobeView"
+             x:DataType="vm:WardrobeViewModel">
+
+    <Design.DataContext>
+        <vm:WardrobeViewModel/>
+    </Design.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 搜索和筛选栏 -->
+            <RowDefinition Height="*"/>    <!-- 服装列表 -->
+        </Grid.RowDefinitions>
+        
+        <!-- 搜索和筛选栏 -->
+        <Border Grid.Row="0" Background="{DynamicResource SemiColorBgContainer}" 
+                BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="0,0,0,1"
+                Padding="16,12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- 搜索框和筛选按钮 -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 搜索框 -->
+                    <TextBox Grid.Column="0" 
+                             Text="{Binding SearchText}"
+                             Watermark="搜索服装、品牌、备注..."
+                             Margin="0,0,8,0">
+                        <TextBox.InnerLeftContent>
+                            <semi:Icon Value="Search" FontSize="16" Margin="8,0,4,0" 
+                                      Foreground="{DynamicResource SemiColorTextTertiary}"/>
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                    
+                    <!-- 筛选按钮 -->
+                    <Button Grid.Column="1" 
+                            Classes="Secondary"
+                            Command="{Binding ToggleFilterPanelCommand}"
+                            Width="40" Height="40">
+                        <semi:Icon Value="Filter" FontSize="16"/>
+                    </Button>
+                </Grid>
+                
+                <!-- 筛选面板 -->
+                <Border Grid.Row="1" 
+                        IsVisible="{Binding IsFilterPanelOpen}"
+                        Background="{DynamicResource SemiColorBgElevated}"
+                        CornerRadius="8"
+                        Padding="12"
+                        Margin="0,8,0,0"
+                        BoxShadow="0 2 8 0 #20000000">
+                    <StackPanel Spacing="12">
+                        <!-- 分类筛选 -->
+                        <StackPanel>
+                            <TextBlock Text="分类" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding Categories}"
+                                     SelectedItem="{Binding SelectedCategory}"
+                                     PlaceholderText="选择分类"
+                                     HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        
+                        <!-- 季节筛选 -->
+                        <StackPanel>
+                            <TextBlock Text="季节" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding Seasons}"
+                                     SelectedItem="{Binding SelectedSeason}"
+                                     PlaceholderText="选择季节"
+                                     HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        
+                        <!-- 场合筛选 -->
+                        <StackPanel>
+                            <TextBlock Text="场合" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding Occasions}"
+                                     SelectedItem="{Binding SelectedOccasion}"
+                                     PlaceholderText="选择场合"
+                                     HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        
+                        <!-- 颜色筛选 -->
+                        <StackPanel>
+                            <TextBlock Text="颜色" FontWeight="Medium" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding Colors}"
+                                     SelectedItem="{Binding SelectedColor}"
+                                     PlaceholderText="选择颜色"
+                                     HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        
+                        <!-- 操作按钮 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Button Grid.Column="0" 
+                                    Classes="Secondary"
+                                    Command="{Binding ClearFiltersCommand}"
+                                    Content="清除"
+                                    Margin="0,0,4,0"/>
+                            
+                            <Button Grid.Column="1" 
+                                    Classes="Primary"
+                                    Command="{Binding ToggleFilterPanelCommand}"
+                                    Content="确定"
+                                    Margin="4,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+        
+        <!-- 服装列表 -->
+        <Grid Grid.Row="1">
+            <!-- 加载指示器 -->
+            <Border IsVisible="{Binding IsLoading}"
+                    Background="{DynamicResource SemiColorBgContainer}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel Orientation="Vertical" Spacing="12">
+                    <semi:ProgressRing IsIndeterminate="True" Width="32" Height="32"/>
+                    <TextBlock Text="加载中..." HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- 空状态 -->
+            <Border IsVisible="{Binding FilteredClothingItems.Count, Converter={StaticResource EqualityConverter}, ConverterParameter=0}"
+                    Background="{DynamicResource SemiColorBgContainer}">
+                <StackPanel Orientation="Vertical" Spacing="16" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <semi:Icon Value="Wardrobe" FontSize="64" 
+                              Foreground="{DynamicResource SemiColorTextTertiary}"/>
+                    <TextBlock Text="暂无服装" FontSize="16" 
+                              Foreground="{DynamicResource SemiColorTextSecondary}"/>
+                    <Button Classes="Primary" 
+                            Command="{Binding AddNewClothingCommand}"
+                            Content="添加第一件服装"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- 服装网格 -->
+            <ScrollViewer IsVisible="{Binding FilteredClothingItems.Count, Converter={StaticResource GreaterThanConverter}, ConverterParameter=0}">
+                <ItemsControl ItemsSource="{Binding FilteredClothingItems}" Margin="16">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" HorizontalAlignment="Stretch"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource SemiColorBgElevated}"
+                                    CornerRadius="12"
+                                    Margin="4"
+                                    BoxShadow="0 2 8 0 #10000000">
+                                <Border.GestureRecognizers>
+                                    <TappedGestureRecognizer Command="{Binding $parent[UserControl].DataContext.SelectItemCommand}"
+                                                           CommandParameter="{Binding}"/>
+                                </Border.GestureRecognizers>
+                                
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- 服装图片 -->
+                                    <Border Grid.Row="0" 
+                                            Background="{DynamicResource SemiColorFillQuaternary}"
+                                            CornerRadius="12,12,0,0"
+                                            Height="160">
+                                        <Image Source="{Binding CropUri, FallbackValue={Binding Uri}}"
+                                               Stretch="UniformToFill"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                        
+                                        <!-- 收藏按钮 -->
+                                        <Button Classes="Tertiary"
+                                                Command="{Binding $parent[UserControl].DataContext.ToggleFavoriteCommand}"
+                                                CommandParameter="{Binding}"
+                                                Width="32" Height="32"
+                                                CornerRadius="16"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
+                                                Margin="8"
+                                                Background="#80FFFFFF">
+                                            <semi:Icon Value="{Binding IsFavorite, Converter={StaticResource SelectConverter}, ConverterParameter='Heart|HeartOutline'}"
+                                                      FontSize="16"
+                                                      Foreground="{Binding IsFavorite, Converter={StaticResource SelectConverter}, ConverterParameter='#FF4D4F|#8C8C8C'}"/>
+                                        </Button>
+                                        
+                                        <!-- 多选模式复选框 -->
+                                        <CheckBox IsVisible="{Binding $parent[UserControl].DataContext.IsMultiSelectMode}"
+                                                 IsChecked="{Binding $parent[UserControl].DataContext.SelectedItems.Contains(.)}"
+                                                 HorizontalAlignment="Left"
+                                                 VerticalAlignment="Top"
+                                                 Margin="8"/>
+                                    </Border>
+                                    
+                                    <!-- 服装信息 -->
+                                    <StackPanel Grid.Row="1" Margin="12,8">
+                                        <TextBlock Text="{Binding Category2}"
+                                                  FontWeight="Medium"
+                                                  FontSize="14"
+                                                  TextTrimming="CharacterEllipsis"/>
+                                        
+                                        <TextBlock Text="{Binding BaseColor}"
+                                                  FontSize="12"
+                                                  Foreground="{DynamicResource SemiColorTextSecondary}"
+                                                  Margin="0,2,0,0"/>
+                                        
+                                        <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,4,0,0">
+                                            <!-- 季节标签 -->
+                                            <ItemsControl ItemsSource="{Binding SeasonTags}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="2"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{DynamicResource SemiColorPrimaryBg}"
+                                                               CornerRadius="4"
+                                                               Padding="4,2">
+                                                            <TextBlock Text="{Binding}"
+                                                                      FontSize="10"
+                                                                      Foreground="{DynamicResource SemiColorPrimary}"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            
+                                            <!-- 穿着次数 -->
+                                            <TextBlock Text="{Binding WornCount, StringFormat='穿过{0}次'}"
+                                                      FontSize="10"
+                                                      Foreground="{DynamicResource SemiColorTextTertiary}"
+                                                      HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        
+        <!-- 多选模式工具栏 -->
+        <Border Grid.Row="1"
+                IsVisible="{Binding IsMultiSelectMode, Converter={StaticResource EqualityConverter}, ConverterParameter=true}"
+                Background="{DynamicResource SemiColorBgContainer}"
+                BorderBrush="{DynamicResource SemiColorBorder}"
+                BorderThickness="0,1,0,0"
+                VerticalAlignment="Bottom"
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0"
+                          Text="{Binding SelectedItems.Count, StringFormat='已选择 {0} 件'}"
+                          VerticalAlignment="Center"/>
+                
+                <Button Grid.Column="2"
+                        Classes="Secondary"
+                        Command="{Binding ToggleMultiSelectModeCommand}"
+                        Content="取消"
+                        Margin="0,0,8,0"/>
+                
+                <Button Grid.Column="3"
+                        Classes="Danger"
+                        Command="{Binding DeleteSelectedItemsCommand}"
+                        Content="删除"
+                        IsEnabled="{Binding SelectedItems.Count, Converter={x:Static BoolConverters.IsGreaterThan}, ConverterParameter=0}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
